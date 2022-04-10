@@ -13,10 +13,10 @@ Crypto:
 	output: name, symbol, and current price of the currency
  */
 @SpringBootApplication
-public class M15FinalProjectMegerdichianAniApplication {
+public class App {
 
 	public static void main(String[] args) {
-		SpringApplication.run(M15FinalProjectMegerdichianAniApplication.class, args);
+		SpringApplication.run(App.class, args);
 
 		Scanner scanner = new Scanner(System.in);
 
@@ -40,7 +40,7 @@ public class M15FinalProjectMegerdichianAniApplication {
 					issWeatherOutput();
 					break;
 				case 4:
-					crypto();
+					cryptoOutput();
 					break;
 				default:
 					return;
@@ -155,25 +155,40 @@ public class M15FinalProjectMegerdichianAniApplication {
 	}
 
 
-	public static void crypto(){
-		String asset_id = "ETH";
-		String cryptoURI = "https://rest.coinapi.io/v1/assets/" + asset_id + "?apikey=891FBB85-F2B7-40A5-A203-A6962E71B4CB";
+	public static String getCryptoFromUser(){
+		System.out.print("Please enter a cryptocurrency symbol: ");
+		Scanner scanner = new Scanner(System.in);
+		String userCrypto = scanner.nextLine();
+		return userCrypto;
+	}
+
+	public static CryptoResponse getCryptoResponse(String cryptoURI){
 		WebClient client = WebClient.create(cryptoURI);
 
-		Mono<CryptoResponse[]> response2 = client
+		Mono<CryptoResponse[]> response = client
 				.get()
 				.retrieve()
 				.bodyToMono(CryptoResponse[].class);
 
 
-		CryptoResponse cryptoResponse = response2.share().block()[0];
+		CryptoResponse cryptoResponse = response.share().block()[0];
 
+		return cryptoResponse;
+	}
 
-		System.out.println(cryptoResponse.name);
-		System.out.println(cryptoResponse.asset_id);
-		System.out.println(cryptoResponse.price_usd);
-
+	public static void printCryptoReport(CryptoResponse cryptoResponse){
+		System.out.println("Name: " + cryptoResponse.name);
+		System.out.println("Symbol: " + cryptoResponse.asset_id);
+		System.out.format("%7s%.2f\n","Price: $", cryptoResponse.price_usd);
 
 	}
+
+	public static void cryptoOutput(){
+		String asset_id = getCryptoFromUser();
+		String cryptoURI = "https://rest.coinapi.io/v1/assets/" + asset_id + "?apikey=891FBB85-F2B7-40A5-A203-A6962E71B4CB";
+		CryptoResponse cryptoResponse = getCryptoResponse(cryptoURI);
+		printCryptoReport(cryptoResponse);
+	}
+
 
 }
