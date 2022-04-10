@@ -28,10 +28,10 @@ public class App {
 			System.out.println("5. Exit");
 			System.out.print("Please make a selection: ");
 			int userChoice = Integer.parseInt(scanner.nextLine());
-			System.out.println(userChoice);
+
 			switch(userChoice){
 				case 1:
-					weatherByCity();
+					weatherByCityOutput();
 					break;
 				case 2:
 					issLocationOutput();
@@ -50,6 +50,13 @@ public class App {
 
 	}
 
+	public static String getCityFromUser(){
+		System.out.print("Please enter a city: ");
+		Scanner scanner = new Scanner(System.in);
+		String userCity = scanner.nextLine();
+		return userCity;
+	}
+
 	public static WeatherResponse getWeatherResponse(String weatherURI){
 
 		WebClient client = WebClient.create(weatherURI);
@@ -65,13 +72,8 @@ public class App {
 
 	}
 
-	public static String getCityFromUser(){
-		System.out.print("Please enter a city: ");
-		Scanner scanner = new Scanner(System.in);
-		String userCity = scanner.nextLine();
-		return userCity;
-	}
-	public static void weatherByCity(){
+
+	public static void weatherByCityOutput(){
 
 		String cityName = getCityFromUser();
 		String weatherURI = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&appid=ca4ebfaa6ee730995228e42c6b18719d&units=imperial";
@@ -80,26 +82,54 @@ public class App {
 
 	}
 
+
+	// return the iss location response
+	public static SpaceResponse getSpaceResponse(){
+
+		String issURI = "http://api.open-notify.org/iss-now.json";
+		WebClient client = WebClient.create(issURI);
+
+		// get response
+		Mono<SpaceResponse> response = client
+				.get()
+				.retrieve()
+				.bodyToMono(SpaceResponse.class);
+
+		SpaceResponse spaceResponse = response.share().block();
+
+		return spaceResponse;
+	}
+
+
+
 	// used for options 2 and 3
 	// prints iss coordinates, city, country and returns weatherResponse to be used for option 3
 	public static WeatherResponse issLocationOutput(){
-		SpaceResponse space = issLocation();
-		WeatherResponse weatherResponse = issWeather(space.iss_position.latitude,space.iss_position.longitude);
+		SpaceResponse spaceResponse = getSpaceResponse();
+		String weatherURI = "https://api.openweathermap.org/data/2.5/weather?lat="+
+				spaceResponse.getIss_position().getLatitude() + "&lon=" + spaceResponse.getIss_position().getLongitude() + "&appid=ca4ebfaa6ee730995228e42c6b18719d";
+		WeatherResponse weatherResponse = getWeatherResponse(weatherURI);
 
+		printISSLocationReport(spaceResponse, weatherResponse);
+
+		return weatherResponse;
+	}
+
+	public static void printISSLocationReport(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
 		// print iss coordinates
 		System.out.print("ISS Coordinates: (");
-		System.out.print(space.iss_position.longitude + " , ");
-		System.out.println(space.iss_position.latitude + ")");
+		System.out.print(spaceResponse.getIss_position().getLongitude() + " , ");
+		System.out.println(spaceResponse.getIss_position().getLatitude() + ")");
 
 		// print iss city, country
-		if(weatherResponse.sys == null || weatherResponse.name.equals("")){
+		if(weatherResponse.getSys() == null || weatherResponse.getName().equals("")){
 			System.out.println("The ISS is not in a country right now!");
 		}
 		else{
-			System.out.println("Location: " + weatherResponse.name + ", " + weatherResponse.sys.country);
+			System.out.println("Location: " + weatherResponse.getName() + ", " + weatherResponse.getSys().getCountry());
 		}
 		System.out.println("\n");
-		return weatherResponse;
+
 	}
 
 
@@ -112,49 +142,18 @@ public class App {
 
 	public static void printWeatherReport(WeatherResponse weatherResponse){
 		System.out.println("Weather Report");
-		System.out.println("Current Temperature: " + weatherResponse.main.temp);
-		System.out.println("Feels Like: " + weatherResponse.main.feels_like);
-		System.out.println("Temperature Range: " + weatherResponse.main.temp_min + " - " + weatherResponse.main.temp_max);
-		System.out.println("Humidity: " + weatherResponse.main.humidity);
+		System.out.println("Current Temperature: " + weatherResponse.getMain().getTemp());
+		System.out.println("Feels Like: " + weatherResponse.getMain().getFeels_like());
+		System.out.println("Temperature Range: " + weatherResponse.getMain().getTemp_min() + " - " + weatherResponse.getMain().getTemp_max());
+		System.out.println("Humidity: " + weatherResponse.getMain().getHumidity());
 		System.out.println("\n");
 	}
-	// return the iss location response
-	public static SpaceResponse issLocation(){
-
-		String issURI = "http://api.open-notify.org/iss-now.json";
-		WebClient client = WebClient.create(issURI);
-
-		// get response
-		Mono<SpaceResponse> response = client
-				.get()
-				.retrieve()
-				.bodyToMono(SpaceResponse.class);
-
-		SpaceResponse issResponse = response.share().block();
-
-		return issResponse;
-	}
-
-	// return iss weather response
-	public static WeatherResponse issWeather(String lat, String lon){
-		String mv = "https://api.openweathermap.org/data/2.5/weather?lat=37.39&lon=-122.08&appid=ca4ebfaa6ee730995228e42c6b18719d";
-		String weatherURI = "https://api.openweathermap.org/data/2.5/weather?lat="+
-				lat + "&lon=" + lon + "&appid=ca4ebfaa6ee730995228e42c6b18719d";
-
-		WebClient client = WebClient.create(weatherURI);
-
-		// get response
-		Mono<WeatherResponse> response2 = client
-				.get()
-				.retrieve()
-				.bodyToMono(WeatherResponse.class);
-
-		WeatherResponse weatherResponse = response2.share().block();
-		return weatherResponse;
-
-	}
 
 
+
+
+
+	// CRYPTO
 	public static String getCryptoFromUser(){
 		System.out.print("Please enter a cryptocurrency symbol: ");
 		Scanner scanner = new Scanner(System.in);
@@ -176,10 +175,11 @@ public class App {
 		return cryptoResponse;
 	}
 
+
 	public static void printCryptoReport(CryptoResponse cryptoResponse){
-		System.out.println("Name: " + cryptoResponse.name);
-		System.out.println("Symbol: " + cryptoResponse.asset_id);
-		System.out.format("%7s%.2f\n","Price: $", cryptoResponse.price_usd);
+		System.out.println("Name: " + cryptoResponse.getName());
+		System.out.println("Symbol: " + cryptoResponse.getAsset_id());
+		System.out.format("%7s%.2f\n","Price: $", cryptoResponse.getPrice_usd());
 
 	}
 

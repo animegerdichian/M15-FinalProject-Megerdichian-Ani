@@ -1,11 +1,35 @@
 package com.company.M15FinalProjectMegerdichianAni;
 
 public class SpaceResponse {
-    public String message;
-    public Position iss_position;
+
+    private Position iss_position;
+
+    public Position getIss_position() {
+        return iss_position;
+    }
+
+    public void setIss_position(Position iss_position) {
+        this.iss_position = iss_position;
+    }
 
     public class Position{
-        public String latitude;
-        public String longitude;
+        private String latitude;
+        private String longitude;
+
+        public String getLatitude() {
+            return latitude;
+        }
+
+        public void setLatitude(String latitude) {
+            this.latitude = latitude;
+        }
+
+        public String getLongitude() {
+            return longitude;
+        }
+
+        public void setLongitude(String longitude) {
+            this.longitude = longitude;
+        }
     }
 }
