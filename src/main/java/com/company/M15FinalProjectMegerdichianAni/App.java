@@ -50,6 +50,7 @@ public class App {
 
 	}
 
+	// get a city as input from the user
 	public static String getCityFromUser(){
 		System.out.print("Please enter a city: ");
 		Scanner scanner = new Scanner(System.in);
@@ -57,6 +58,7 @@ public class App {
 		return userCity;
 	}
 
+	// get a WeatherResponse given an URI
 	public static WeatherResponse getWeatherResponse(String weatherURI){
 
 		WebClient client = WebClient.create(weatherURI);
@@ -72,7 +74,17 @@ public class App {
 
 	}
 
+	// prints pertinent info given a WeatherResponse
+	public static void printWeatherReport(WeatherResponse weatherResponse){
+		System.out.println("Weather Report");
+		System.out.println("Current Temperature: " + weatherResponse.getMain().getTemp());
+		System.out.println("Feels Like: " + weatherResponse.getMain().getFeels_like());
+		System.out.println("Temperature Range: " + weatherResponse.getMain().getTemp_min() + " - " + weatherResponse.getMain().getTemp_max());
+		System.out.println("Humidity: " + weatherResponse.getMain().getHumidity());
+		System.out.println("\n");
+	}
 
+	// option 1
 	public static void weatherByCityOutput(){
 
 		String cityName = getCityFromUser();
@@ -83,7 +95,7 @@ public class App {
 	}
 
 
-	// return the iss location response
+	// return the iss location SpaceResponse
 	public static SpaceResponse getSpaceResponse(){
 
 		String issURI = "http://api.open-notify.org/iss-now.json";
@@ -101,20 +113,7 @@ public class App {
 	}
 
 
-
-	// used for options 2 and 3
-	// prints iss coordinates, city, country and returns weatherResponse to be used for option 3
-	public static WeatherResponse issLocationOutput(){
-		SpaceResponse spaceResponse = getSpaceResponse();
-		String weatherURI = "https://api.openweathermap.org/data/2.5/weather?lat="+
-				spaceResponse.getIss_position().getLatitude() + "&lon=" + spaceResponse.getIss_position().getLongitude() + "&appid=ca4ebfaa6ee730995228e42c6b18719d";
-		WeatherResponse weatherResponse = getWeatherResponse(weatherURI);
-
-		printISSLocationReport(spaceResponse, weatherResponse);
-
-		return weatherResponse;
-	}
-
+	// prints ISS location info
 	public static void printISSLocationReport(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
 		// print iss coordinates
 		System.out.print("ISS Coordinates: (");
@@ -132,6 +131,19 @@ public class App {
 
 	}
 
+	// used for options 2 and 3
+	// prints iss coordinates, city, country and returns weatherResponse to be used for option 3
+	public static WeatherResponse issLocationOutput(){
+		SpaceResponse spaceResponse = getSpaceResponse();
+		String weatherURI = "https://api.openweathermap.org/data/2.5/weather?lat="+
+				spaceResponse.getIss_position().getLatitude() + "&lon=" + spaceResponse.getIss_position().getLongitude() + "&appid=ca4ebfaa6ee730995228e42c6b18719d";
+		WeatherResponse weatherResponse = getWeatherResponse(weatherURI);
+
+		printISSLocationReport(spaceResponse, weatherResponse);
+
+		return weatherResponse;
+	}
+
 
 	public static void issWeatherOutput(){
 		WeatherResponse weatherResponse = issLocationOutput();
@@ -139,17 +151,6 @@ public class App {
 		printWeatherReport(weatherResponse);
 
 	}
-
-	public static void printWeatherReport(WeatherResponse weatherResponse){
-		System.out.println("Weather Report");
-		System.out.println("Current Temperature: " + weatherResponse.getMain().getTemp());
-		System.out.println("Feels Like: " + weatherResponse.getMain().getFeels_like());
-		System.out.println("Temperature Range: " + weatherResponse.getMain().getTemp_min() + " - " + weatherResponse.getMain().getTemp_max());
-		System.out.println("Humidity: " + weatherResponse.getMain().getHumidity());
-		System.out.println("\n");
-	}
-
-
 
 
 
