@@ -24,6 +24,7 @@ public class App {
 		Scanner scanner = new Scanner(System.in);
 
 		while(true){
+			System.out.println("\nAPI Retriever");
 			System.out.println("1. Weather by City");
 			System.out.println("2. Location of ISS");
 			System.out.println("3. Weather at ISS Location");
@@ -41,13 +42,10 @@ public class App {
 				}
 				catch(NumberFormatException e){
 					userChoice = 0;
-					System.out.println("Incorrect selection; must be an integer!");
-
-
 				}
 
 				if(userChoice < 1 || userChoice > 5){
-					System.out.println("Incorrect selection; must in range 1-5!");
+					System.out.println("Incorrect selection; must be an integer in range 1-5!");
 				}
 
 			}while(userChoice < 1 || userChoice > 5);
@@ -76,7 +74,7 @@ public class App {
 
 	// get a city as input from the user
 	public static String getCityFromUser(){
-		System.out.print("Please enter a city: ");
+		System.out.print("\nPlease enter a city: ");
 		Scanner scanner = new Scanner(System.in);
 		String userCity = scanner.nextLine();
 		return userCity;
@@ -122,7 +120,6 @@ public class App {
 		System.out.println("Feels Like: " + weatherResponse.getMain().getFeels_like());
 		System.out.println("Temperature Range: " + weatherResponse.getMain().getTemp_min() + " - " + weatherResponse.getMain().getTemp_max());
 		System.out.println("Humidity: " + weatherResponse.getMain().getHumidity());
-		System.out.println("\n");
 	}
 
 	// option 1
@@ -177,7 +174,7 @@ public class App {
 			return;
 		}
 		// print iss coordinates
-		System.out.print("ISS Coordinates: (");
+		System.out.print("\nISS Coordinates: (");
 		System.out.print(spaceResponse.getIss_position().getLongitude() + " , ");
 		System.out.println(spaceResponse.getIss_position().getLatitude() + ")");
 
@@ -188,7 +185,7 @@ public class App {
 		else{
 			System.out.println("Location: " + weatherResponse.getName() + ", " + weatherResponse.getSys().getCountry());
 		}
-		System.out.println("\n");
+
 
 	}
 
@@ -218,7 +215,7 @@ public class App {
 
 	// CRYPTO
 	public static String getCryptoFromUser(){
-		System.out.print("Please enter a cryptocurrency symbol: ");
+		System.out.print("\nPlease enter a cryptocurrency symbol: ");
 		Scanner scanner = new Scanner(System.in);
 		String userCrypto = scanner.nextLine();
 		return userCrypto;
@@ -266,7 +263,6 @@ public class App {
 		System.out.println("\nName: " + cryptoResponse.getName());
 		System.out.println("Symbol: " + cryptoResponse.getAsset_id());
 		System.out.format("%7s%.2f\n","Price: $", cryptoResponse.getPrice_usd());
-		System.out.println("\n");
 
 	}
 
