@@ -3,7 +3,10 @@ package com.company.M15FinalProjectMegerdichianAni;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+
+
 
 import java.util.Scanner;
 
@@ -26,8 +29,29 @@ public class App {
 			System.out.println("3. Weather at ISS Location");
 			System.out.println("4. Crypto");
 			System.out.println("5. Exit");
-			System.out.print("Please make a selection: ");
-			int userChoice = Integer.parseInt(scanner.nextLine());
+
+			int userChoice = 0;
+
+			do{
+
+				try{
+					System.out.print("Please make a selection: ");
+					userChoice = Integer.parseInt(scanner.nextLine());
+
+				}
+				catch(NumberFormatException e){
+					userChoice = 0;
+					System.out.println("Incorrect selection; must be an integer!");
+
+
+				}
+
+				if(userChoice < 1 || userChoice > 5){
+					System.out.println("Incorrect selection; must in range 1-5!");
+				}
+
+			}while(userChoice < 1 || userChoice > 5);
+
 
 			switch(userChoice){
 				case 1:
@@ -62,21 +86,38 @@ public class App {
 	public static WeatherResponse getWeatherResponse(String weatherURI){
 
 		WebClient client = WebClient.create(weatherURI);
+		WeatherResponse weatherResponse = null;
+		try{
+			// get response
+			Mono<WeatherResponse> response = client
+					.get()
+					.retrieve()
+					.bodyToMono(WeatherResponse.class);
 
-		// get response
-		Mono<WeatherResponse> response2 = client
-				.get()
-				.retrieve()
-				.bodyToMono(WeatherResponse.class);
+			 weatherResponse = response.share().block();
+		}
+		catch (WebClientResponseException we) {
+			int statusCode = we.getRawStatusCode();
+			if (statusCode >= 400 && statusCode <500){
+				System.out.println("Client Error");
+			}
+			else if (statusCode >= 500 && statusCode <600){
+				System.out.println("Server Error");
+			}
+			//System.out.println("Message: " + we.getMessage());
+		}
 
-		WeatherResponse weatherResponse = response2.share().block();
+
 		return weatherResponse;
 
 	}
 
 	// prints pertinent info given a WeatherResponse
 	public static void printWeatherReport(WeatherResponse weatherResponse){
-		System.out.println("Weather Report");
+		if(weatherResponse == null){
+			return;
+		}
+		System.out.println("\nWeather Report");
 		System.out.println("Current Temperature: " + weatherResponse.getMain().getTemp());
 		System.out.println("Feels Like: " + weatherResponse.getMain().getFeels_like());
 		System.out.println("Temperature Range: " + weatherResponse.getMain().getTemp_min() + " - " + weatherResponse.getMain().getTemp_max());
@@ -87,9 +128,13 @@ public class App {
 	// option 1
 	public static void weatherByCityOutput(){
 
-		String cityName = getCityFromUser();
-		String weatherURI = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&appid=ca4ebfaa6ee730995228e42c6b18719d&units=imperial";
-		WeatherResponse weatherResponse = getWeatherResponse(weatherURI);
+		WeatherResponse weatherResponse = null;
+		do{
+			String cityName = getCityFromUser();
+			String weatherURI = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&appid=ca4ebfaa6ee730995228e42c6b18719d&units=imperial";
+			weatherResponse = getWeatherResponse(weatherURI);
+
+		}while(weatherResponse == null);
 		printWeatherReport(weatherResponse);
 
 	}
@@ -101,20 +146,36 @@ public class App {
 		String issURI = "http://api.open-notify.org/iss-now.json";
 		WebClient client = WebClient.create(issURI);
 
-		// get response
-		Mono<SpaceResponse> response = client
-				.get()
-				.retrieve()
-				.bodyToMono(SpaceResponse.class);
+		SpaceResponse spaceResponse = null;
+		try{
+			// get response
+			Mono<SpaceResponse> response = client
+					.get()
+					.retrieve()
+					.bodyToMono(SpaceResponse.class);
 
-		SpaceResponse spaceResponse = response.share().block();
-
+			spaceResponse = response.share().block();
+		}
+		catch (WebClientResponseException we) {
+			int statusCode = we.getRawStatusCode();
+			if (statusCode >= 400 && statusCode <500){
+				System.out.println("Client Error");
+			}
+			else if (statusCode >= 500 && statusCode <600){
+				System.out.println("Server Error");
+			}
+			//System.out.println("Message: " + we.getMessage());
+		}
 		return spaceResponse;
 	}
 
 
 	// prints ISS location info
 	public static void printISSLocationReport(SpaceResponse spaceResponse, WeatherResponse weatherResponse){
+		if(spaceResponse == null || weatherResponse == null){
+			System.out.println("Sorry, ISS location was not found!");
+			return;
+		}
 		// print iss coordinates
 		System.out.print("ISS Coordinates: (");
 		System.out.print(spaceResponse.getIss_position().getLongitude() + " , ");
@@ -135,11 +196,14 @@ public class App {
 	// prints iss coordinates, city, country and returns weatherResponse to be used for option 3
 	public static WeatherResponse issLocationOutput(){
 		SpaceResponse spaceResponse = getSpaceResponse();
-		String weatherURI = "https://api.openweathermap.org/data/2.5/weather?lat="+
-				spaceResponse.getIss_position().getLatitude() + "&lon=" + spaceResponse.getIss_position().getLongitude() + "&appid=ca4ebfaa6ee730995228e42c6b18719d";
-		WeatherResponse weatherResponse = getWeatherResponse(weatherURI);
+		WeatherResponse weatherResponse = null;
+		if(spaceResponse != null){
+			String weatherURI = "https://api.openweathermap.org/data/2.5/weather?lat="+
+					spaceResponse.getIss_position().getLatitude() + "&lon=" + spaceResponse.getIss_position().getLongitude() + "&appid=ca4ebfaa6ee730995228e42c6b18719d";
+			weatherResponse = getWeatherResponse(weatherURI);
 
-		printISSLocationReport(spaceResponse, weatherResponse);
+			printISSLocationReport(spaceResponse, weatherResponse);
+		}
 
 		return weatherResponse;
 	}
@@ -152,8 +216,6 @@ public class App {
 
 	}
 
-
-
 	// CRYPTO
 	public static String getCryptoFromUser(){
 		System.out.print("Please enter a cryptocurrency symbol: ");
@@ -165,22 +227,46 @@ public class App {
 	public static CryptoResponse getCryptoResponse(String cryptoURI){
 		WebClient client = WebClient.create(cryptoURI);
 
-		Mono<CryptoResponse[]> response = client
-				.get()
-				.retrieve()
-				.bodyToMono(CryptoResponse[].class);
+		CryptoResponse cryptoResponse = null;
+		try{
+			Mono<CryptoResponse[]> response = client
+					.get()
+					.retrieve()
+					.bodyToMono(CryptoResponse[].class);
 
 
-		CryptoResponse cryptoResponse = response.share().block()[0];
+			cryptoResponse = response.share().block()[0];
+
+		}
+		catch(ArrayIndexOutOfBoundsException e){
+
+			cryptoResponse = null;
+		}
+		catch (WebClientResponseException we) {
+			int statusCode = we.getRawStatusCode();
+			if (statusCode >= 400 && statusCode <500){
+				System.out.println("Client Error");
+			}
+			else if (statusCode >= 500 && statusCode <600){
+				System.out.println("Server Error");
+			}
+			//System.out.println("Message: " + we.getMessage());
+		}
+
 
 		return cryptoResponse;
 	}
 
 
 	public static void printCryptoReport(CryptoResponse cryptoResponse){
-		System.out.println("Name: " + cryptoResponse.getName());
+		if(cryptoResponse == null){
+			System.out.println("\nSorry, cryptocurrency was not found.");
+			return;
+		}
+		System.out.println("\nName: " + cryptoResponse.getName());
 		System.out.println("Symbol: " + cryptoResponse.getAsset_id());
 		System.out.format("%7s%.2f\n","Price: $", cryptoResponse.getPrice_usd());
+		System.out.println("\n");
 
 	}
 
