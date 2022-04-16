@@ -1,20 +1,12 @@
 package com.company.M15FinalProjectMegerdichianAni;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-
-
-
 import java.util.Scanner;
 
-/*
-Crypto:
-	input: symbol of a cryptocurrency (ex. BTC), the asset_id
-	output: name, symbol, and current price of the currency
- */
+
 @SpringBootApplication
 public class App {
 
@@ -24,6 +16,7 @@ public class App {
 		Scanner scanner = new Scanner(System.in);
 
 		while(true){
+			// Print Menu
 			System.out.println("\nAPI Retriever");
 			System.out.println("1. Weather by City");
 			System.out.println("2. Location of ISS");
@@ -31,19 +24,21 @@ public class App {
 			System.out.println("4. Crypto");
 			System.out.println("5. Exit");
 
+			// initialize variable for user input
 			int userChoice = 0;
 
 			do{
-
 				try{
+					// ask user for a selection
 					System.out.print("Please make a selection: ");
 					userChoice = Integer.parseInt(scanner.nextLine());
 
 				}
-				catch(NumberFormatException e){
+				catch(NumberFormatException e){ // catch input in incorrect format
 					userChoice = 0;
 				}
 
+				// print message to user if input is invalid
 				if(userChoice < 1 || userChoice > 5){
 					System.out.println("Incorrect selection; must be an integer in range 1-5!");
 				}
@@ -51,6 +46,7 @@ public class App {
 			}while(userChoice < 1 || userChoice > 5);
 
 
+			// use user input to call corresponding method
 			switch(userChoice){
 				case 1:
 					weatherByCityOutput();
@@ -68,19 +64,26 @@ public class App {
 					return;
 			}
 		}
-
-
 	}
 
-	// get a city as input from the user
+	/**
+	 * getCityFromUser: a method to retrieve a city
+	 * from the user
+	 * @returns the user's desired city as a String
+	 */
 	public static String getCityFromUser(){
-		System.out.print("\nPlease enter a city: ");
 		Scanner scanner = new Scanner(System.in);
+		System.out.print("\nPlease enter a city: ");
 		String userCity = scanner.nextLine();
 		return userCity;
 	}
 
-	// get a WeatherResponse given an URI
+	/**
+	 * getWeatherResponse: a method to create a WeatherResponse object given
+	 * a URI String to get an OpenWeather API response
+	 * @param weatherURI String that is used to request the Weather API response
+	 * @returns a WeatherResponse that captures all relevant info in the API response
+	 */
 	public static WeatherResponse getWeatherResponse(String weatherURI){
 
 		WebClient client = WebClient.create(weatherURI);
@@ -105,12 +108,14 @@ public class App {
 			//System.out.println("Message: " + we.getMessage());
 		}
 
-
 		return weatherResponse;
 
 	}
 
-	// prints pertinent info given a WeatherResponse
+	/**
+	 * printWeatherReport: a method to print a weather report given a weatherResponse
+	 * @param weatherResponse that has captured pertinent information of a Weather API response
+	 */
 	public static void printWeatherReport(WeatherResponse weatherResponse){
 		if(weatherResponse == null){
 			return;
@@ -122,7 +127,11 @@ public class App {
 		System.out.println("Humidity: " + weatherResponse.getMain().getHumidity());
 	}
 
-	// option 1
+	/**
+	 * weatherByCityOutput: a method that calls other helper methods
+	 * getCityFromUser, getWeatherResponse, and printWeatherReport to
+	 * display a report of the weather at the user's desired city
+	 */
 	public static void weatherByCityOutput(){
 
 		WeatherResponse weatherResponse = null;
