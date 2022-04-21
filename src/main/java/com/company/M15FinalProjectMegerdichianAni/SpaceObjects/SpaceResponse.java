@@ -1,4 +1,4 @@
-package com.company.M15FinalProjectMegerdichianAni;
+package com.company.M15FinalProjectMegerdichianAni.SpaceObjects;
 
 public class SpaceResponse {
 

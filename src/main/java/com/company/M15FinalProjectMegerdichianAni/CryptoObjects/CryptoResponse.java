@@ -1,4 +1,4 @@
-package com.company.M15FinalProjectMegerdichianAni;
+package com.company.M15FinalProjectMegerdichianAni.CryptoObjects;
 
 public class CryptoResponse {
 

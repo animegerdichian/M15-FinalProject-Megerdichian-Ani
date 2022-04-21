@@ -1,4 +1,7 @@
 package com.company.M15FinalProjectMegerdichianAni;
+import com.company.M15FinalProjectMegerdichianAni.CryptoObjects.CryptoResponse;
+import com.company.M15FinalProjectMegerdichianAni.SpaceObjects.SpaceResponse;
+import com.company.M15FinalProjectMegerdichianAni.WeatherObjects.WeatherResponse;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -6,6 +9,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import java.util.Scanner;
 
+// have a weather package
+	// have classes inside the package to organize the response
 
 @SpringBootApplication
 public class App {
@@ -61,6 +66,7 @@ public class App {
 					cryptoOutput();
 					break;
 				default:
+					System.out.println("Goodbye!");
 					return;
 			}
 		}
@@ -100,10 +106,10 @@ public class App {
 		catch (WebClientResponseException we) {
 			int statusCode = we.getRawStatusCode();
 			if (statusCode >= 400 && statusCode <500){
-				System.out.println("Client Error");
+				System.out.println("Please enter a valid city name!");
 			}
 			else if (statusCode >= 500 && statusCode <600){
-				System.out.println("Server Error");
+				System.out.println("Sorry...server is down!");
 			}
 			//System.out.println("Message: " + we.getMessage());
 		}
